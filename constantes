@@ -1,0 +1,178 @@
+# Créé par SRICHARD, le 21/03/2017 en Python 3.2
+
+# CLASSES JEU PYTHON #
+
+# Import de Pygame
+import pygame
+from pygame.locals import *
+# Et des autres fichiers du jeu
+from constantes import *
+
+# Création d'une classe Perso
+class Perso :
+
+
+    #Initialisation des caractéristques de base de ce Perso
+    def __init__(self, droite, gauche, haut, bas, niveau, case_y, case_x):
+        # Création de 4 direction possible pour ce perso avec une image pour chaque
+        self.droite = pygame.image.load(droite).convert_alpha()
+        self.gauche = pygame.image.load(gauche).convert_alpha()
+        self.haut = pygame.image.load(haut).convert_alpha()
+        self.bas = pygame.image.load(bas).convert_alpha()
+        # Récupération en terme de sprite puis en pixel de la position perso
+        self.case_y = case_y
+        self.case_x = case_x
+        self.y = self.case_y * taille_sprite
+        self.x = self.case_x * taille_sprite
+        # Création d'une direction par défaut arbitrairement
+        self.direction = self.droite
+        self.niveau = niveau
+
+
+    # Création d'une méthode de classe pour déplacer ce Perso
+    def deplacer(self, direction):
+
+        # Si le Perso va vers la droite
+        if direction == 'droite':
+            # On vérifie que le Perso n'est pas dans un coin et peut aller a droite
+            if self.case_x < (nombre_sprite_longueur - 1) :
+                if self.niveau.structure[self.case_y][self.case_x+1] != "A" and self.niveau.structure[self.case_y][self.case_x+1] != "P" and self.niveau.structure[self.case_y][self.case_x+1] != "V" and self.niveau.structure[self.case_y][self.case_x+1] != "E" and self.niveau.structure[self.case_y][self.case_x+1] != "M" and self.niveau.structure[self.case_y][self.case_x+1] != "W" and self.niveau.structure[self.case_y][self.case_x+1] != "N":
+                # Puis on avance d'une case
+                    self.case_x += 1
+                # Puis en avance en terme de pixel
+                    self.x = self.case_x * taille_sprite
+        # On met la bonne image du Perso allant vers la droite
+            self.direction = self.droite
+
+        # Si le Perso va vers la gauche
+        if direction == 'gauche':
+            # Même principe mais pour la gauche donc si le Perso n'est pas déjà collé a gauche
+            if self.case_x > 0 :
+                if self.niveau.structure[self.case_y][self.case_x-1] != "A" and self.niveau.structure[self.case_y][self.case_x-1] != "P" and self.niveau.structure[self.case_y][self.case_x-1] != "V" and self.niveau.structure[self.case_y][self.case_x-1] != "E" and self.niveau.structure[self.case_y][self.case_x-1] != "M" and self.niveau.structure[self.case_y][self.case_x-1] != "W" and self.niveau.structure[self.case_y][self.case_x-1] != "N":
+                    self.case_x -= 1
+                    self.x = self.case_x * taille_sprite
+            self.direction = self.gauche
+
+        # Si le Perso va vers le haut
+        if direction == 'haut':
+            if self.case_y > 0 :
+                if self.niveau.structure[self.case_y-1][self.case_x] != "A" and self.niveau.structure[self.case_y-1][self.case_x]!= "P" and self.niveau.structure[self.case_y-1][self.case_x] != "V" and self.niveau.structure[self.case_y-1][self.case_x] != "E" and self.niveau.structure[self.case_y-1][self.case_x] != "M" and self.niveau.structure[self.case_y-1][self.case_x] != "W" and self.niveau.structure[self.case_y-1][self.case_x] != "N":
+                    self.case_y -= 1
+                    self.y = self.case_y * taille_sprite
+            self.direction = self.haut
+
+        # Si le Perso va vers le bas
+        if direction == 'bas':
+           if self.case_y < (nombre_sprite_longueur - 1) :
+                if self.niveau.structure[self.case_y+1][self.case_x] != "A" and self.niveau.structure[self.case_y+1][self.case_x] != "P" and self.niveau.structure[self.case_y+1][self.case_x] != "V" and self.niveau.structure[self.case_y+1][self.case_x] != "E" and self.niveau.structure[self.case_y+1][self.case_x] != "M" and self.niveau.structure[self.case_y+1][self.case_x] != "W" and self.niveau.structure[self.case_y+1][self.case_x] != "N":
+                    self.case_y += 1
+                    self.y = self.case_y * taille_sprite
+           self.direction = self.bas
+
+
+
+# Création d'une classe Niveau
+class Niveau:
+
+    #Initialisation des caractéristques de base de ce Niveau
+    def __init__(self, fichier):
+        self.fichier = fichier
+        # On met une structure par défaut 0
+        self.structure = 0
+
+    # Création d'une fonction pour generer un niveau a partir d'un fichier texte
+    def generer(self):
+        # On ouvre le fichier d'un des niveaux
+        with open(self.fichier, "r") as fichier:
+            # On creer un tableau
+            structure_niveau = []
+            # On parcourt le fichier
+            # Pour une variable ligne dans notre fichier
+            for ligne in fichier:
+                # on créer un autre tableau pour contenir chacune de ces lignes
+                ligne_niveau = []
+                # On parcourt ce nouveau tableau donc chaque ligne par ligne
+                # Pour une variable lettre dans une ligne
+                for lettre in ligne:
+                    # Si la lettre est différente d'un saut de ligne
+                    if lettre != '/n':
+                        # On ajoute a la fin du tableau ligne_niveau cette lettre
+                        ligne_niveau.append(lettre)
+                # On ajoute ensuite la ligne parcouru au tableau generak de la structure
+                structure_niveau.append(ligne_niveau)
+            # Puis on dit que cette structure prend la place de celle par défaut 0
+            self.structure = structure_niveau
+            
+
+    # Création d'une fonction pour afficher le niveau generer par la fonction précedente
+    def afficher(self, fenetre):
+        # Association des sprites a des variables
+        noir = pygame.image.load(sprite_noir).convert()
+        pierre = pygame.image.load(sprite_pierre).convert()
+        pierre_grass = pygame.image.load(sprite_pierre_grass).convert()
+        arbre = pygame.image.load(sprite_arbre).convert()
+        grass = pygame.image.load(sprite_grass).convert()
+        pathleftright = pygame.image.load(sprite_pathleftright).convert()
+        pathupleft = pygame.image.load(sprite_pathupleft).convert()
+        pathtopbot = pygame.image.load(sprite_pathtopbot).convert()
+        panneau = pygame.image.load(sprite_panneau).convert()
+        pathbotcastle = pygame.image.load(sprite_pathbotcastle).convert()
+        stoneM = pygame.image.load(sprite_stoneM).convert()
+        stoneW = pygame.image.load(sprite_stoneW).convert()
+        pierreDB = pygame.image.load(sprite_pierreDB).convert()
+        pierreDN = pygame.image.load(sprite_pierreDN).convert()
+        axeB = pygame.image.load(sprite_axeB).convert()
+        Homme = pygame.image.load(sprite_homme).convert()
+
+        # Création d'une variable pour compter le numero des lignes
+        num_ligne= 0
+        # On parcourt le tableau de la structure du niveau
+        for ligne in self.structure:
+            # Création d'une varaible qui compte les cases
+            num_case = 0
+            # On parcourt avec une variable lettre les lignes
+            for lettre in ligne:
+                # Calcul de la position du perso en pixels
+                x = num_case*taille_sprite
+                y = num_ligne*taille_sprite
+                # Puis a chaque case on associe la bonne image
+                # Si la lettre est t
+                if lettre == 'N':
+                    # Alors on met le sprite tree en x et y correspond
+                    fenetre.blit(noir, (x,y))
+                elif lettre == 'P':
+                    fenetre.blit(pierre, (x,y))
+                elif lettre == 'V':
+                    fenetre.blit(pierre_grass, (x,y))
+                elif lettre == 'A':
+                    fenetre.blit(arbre, (x,y))
+                elif lettre == 'G':
+                    fenetre.blit(grass, (x,y))
+                elif lettre == 'B'or lettre == 'X':
+                    fenetre.blit(pathleftright, (x,y))
+                elif lettre == 'C':
+                    fenetre.blit(pathupleft, (x,y))
+                elif lettre == 'D':
+                    fenetre.blit(pathtopbot, (x,y))
+                elif lettre == 'E':
+                    fenetre.blit(panneau, (x,y))
+                elif lettre == 'F':
+                    fenetre.blit(pathbotcastle, (x,y))
+                elif lettre == 'M':
+                    fenetre.blit(stoneM, (x,y))
+                elif lettre == 'W':
+                    fenetre.blit(stoneW, (x,y))
+                elif lettre == 'H':
+                    fenetre.blit(pierreDB, (x,y))
+                elif lettre == 'I':
+                    fenetre.blit(pierreDN, (x,y))
+                elif lettre == 'J':
+                    fenetre.blit(axeB, (x,y))
+                elif lettre == 'Q':
+                    fenetre.blit(Homme, (x,y))
+                 
+
+
+        # On incrémente
+                num_case += 1
+            num_ligne +=1
